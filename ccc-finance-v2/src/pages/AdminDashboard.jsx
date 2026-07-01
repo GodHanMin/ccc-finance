@@ -315,22 +315,8 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-100">
             <div className="p-4 border-b border-gray-100 flex justify-between items-center">
               <p className="font-bold text-gray-700">👥 가입자 명단 ({members.length}명)</p>
-              <button onClick={()=>setShowMemberForm(true)} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg">+ 가입자 추가</button>
+              <span className="text-xs text-gray-400">로그인 시 자동 등록됩니다</span>
             </div>
-            {showMemberForm && (
-              <div className="p-4 border-b border-gray-100 bg-gray-50">
-                <div className="flex gap-2">
-                  <input type="text" placeholder="이름 *" value={memberForm.name}
-                    onChange={e=>setMemberForm({...memberForm,name:e.target.value})}
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-                  <input type="text" placeholder="학번 (선택)" value={memberForm.student_id}
-                    onChange={e=>setMemberForm({...memberForm,student_id:e.target.value})}
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-                  <button onClick={addMember} className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">추가</button>
-                  <button onClick={()=>setShowMemberForm(false)} className="px-3 py-2 text-gray-400 hover:bg-gray-200 text-sm rounded-lg">취소</button>
-                </div>
-              </div>
-            )}
             <div className="divide-y divide-gray-50">
               {members.map(m => {
                 const myPays = payments.filter(p => p.profiles?.name === m.name && p.status === 'confirmed')
