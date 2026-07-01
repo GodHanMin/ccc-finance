@@ -5,6 +5,7 @@ import ProfileSetup from './pages/ProfileSetup'
 import MemberDashboard from './pages/MemberDashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import LoadingScreen from './components/LoadingScreen'
+import InAppBrowserGuard from './components/InAppBrowserGuard'
 
 function AppRoutes() {
   const { user, profile, loading } = useAuth()
@@ -30,5 +31,9 @@ function AppRoutes() {
 }
 
 export default function App() {
-  return <AuthProvider><AppRoutes /></AuthProvider>
+  return (
+    <InAppBrowserGuard>
+      <AuthProvider><AppRoutes /></AuthProvider>
+    </InAppBrowserGuard>
+  )
 }
