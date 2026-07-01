@@ -32,7 +32,10 @@ export function AuthProvider({ children }) {
   async function loginWithKakao() {
     await supabase.auth.signInWithOAuth({
       provider: 'kakao',
-      options: { redirectTo: window.location.origin }
+      options: {
+        redirectTo: window.location.origin,
+        scopes: 'profile_nickname', // 이메일 권한 미보유로 닉네임만 요청 (KOE205 방지)
+      }
     })
   }
 
