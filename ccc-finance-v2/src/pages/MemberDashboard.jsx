@@ -150,8 +150,14 @@ export default function MemberDashboard() {
           )}
         </div>
 
-        <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-          <p className="text-sm font-bold text-yellow-800 mb-1">💳 입금 계좌</p>
+        <div
+          className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4 cursor-pointer hover:bg-yellow-100 transition-colors active:scale-[0.99]"
+          onClick={() => {
+            navigator.clipboard.writeText('3333344408600')
+            toast.success('계좌번호가 복사됐어요!')
+          }}
+        >
+          <p className="text-sm font-bold text-yellow-800 mb-1">💳 입금 계좌 <span className="font-normal text-yellow-600">(탭하여 복사)</span></p>
           <p className="text-sm text-yellow-700">카카오뱅크 3333344408600</p>
           <p className="text-sm text-yellow-700">예금주: 강한민</p>
           <p className="text-xs text-yellow-600 mt-1">입금 후 납부 인증 버튼을 눌러주세요!</p>
