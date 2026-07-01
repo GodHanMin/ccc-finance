@@ -319,16 +319,10 @@ export default function AdminDashboard() {
             </div>
             <div className="divide-y divide-gray-50">
               {members.map(m => {
-                const myPays = payments.filter(p => p.profiles?.name === m.name && p.status === 'confirmed')
-                const totalPaid = myPays.reduce((s,p) => s + (p.payment_items?.amount||0), 0)
                 return (
                   <div key={m.id} className="p-4 flex justify-between items-center">
                     <div><p className="font-medium text-gray-800">{m.name}</p>{m.student_id&&<p className="text-xs text-gray-400">{m.student_id}</p>}</div>
                     <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <p className={`text-sm font-medium ${totalPaid>0?'text-green-600':'text-gray-400'}`}>{totalPaid.toLocaleString()}원</p>
-                        <p className="text-xs text-gray-400">{myPays.length}건 완료</p>
-                      </div>
                       <button onClick={()=>deleteMember(m.id)} className="text-xs text-red-300 hover:text-red-500">삭제</button>
                     </div>
                   </div>
