@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import Navbar from '../components/Navbar'
 import toast from 'react-hot-toast'
-import { Upload, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { Upload, CheckCircle, Clock, XCircle, Plus } from 'lucide-react'
 
 export default function MemberDashboard() {
   const { user, profile } = useAuth()
@@ -13,6 +13,12 @@ export default function MemberDashboard() {
   const [uploading, setUploading] = useState(null)
   const [tab, setTab] = useState('ongoing')
   const [receiptModal, setReceiptModal] = useState(null)
+
+  // 직접 신청하기 모달
+  const [showRequestForm, setShowRequestForm] = useState(false)
+  const [requestForm, setRequestForm] = useState({ title: '', amount: '', description: '' })
+  const [requestFile, setRequestFile] = useState(null)
+  const [submittingRequest, setSubmittingRequest] = useState(false)
 
   useEffect(() => { fetchData() }, [])
 
@@ -54,6 +60,49 @@ export default function MemberDashboard() {
       await fetchData()
     } catch { toast.error('오류가 발생했습니다. 다시 시도해주세요.') }
     setUploading(null)
+  }
+
+  async function handleSubmitRequest() {
+    if (!requestForm.title.trim()) return toast.error('항목명을 입력해주세요')
+    if (!requestForm.amount) return toast.error('금액을 입력해주세요')
+    if (!requestFile) return toast.error('증빙 사진을 첨부해주세요')
+    if (requestFile.size > 5 * 1024 * 1024) return toast.error('5MB 이하 파일만 가능합니다')
+
+    setSubmittingRequest(true)
+    try {
+      // 1. 본인 명의 항목 생성 (신청받은 항목으로 표시)
+      const { data: newItem, error: itemErr } = await supabase.from('payment_items').insert({
+        title: requestForm.title.trim(),
+        amount: parseInt(requestForm.amount),
+        description: requestForm.description.trim(),
+        target_ids: [user.id],
+        created_by: user.id,
+        is_self_requested: true,
+      }).select().single()
+      if (itemErr) throw itemErr
+
+      // 2. 증빙 사진 업로드
+      const ext = requestFile.name.split('.').pop()
+      const fileName = `${user.id}/${newItem.id}_${Date.now()}.${ext}`
+      const { error: upErr } = await supabase.storage.from('receipts').upload(fileName, requestFile)
+      if (upErr) throw upErr
+      const { data: urlData } = supabase.storage.from('receipts').getPublicUrl(fileName)
+
+      // 3. 납부 신청 등록 (관리자 승인 대기)
+      const { error: payErr } = await supabase.from('payments').insert({
+        item_id: newItem.id, user_id: user.id, status: 'pending', receipt_url: urlData.publicUrl,
+      })
+      if (payErr) throw payErr
+
+      toast.success('신청 완료! 관리자가 확인 후 승인합니다.')
+      setShowRequestForm(false)
+      setRequestForm({ title: '', amount: '', description: '' })
+      setRequestFile(null)
+      await fetchData()
+    } catch {
+      toast.error('오류가 발생했습니다. 다시 시도해주세요.')
+    }
+    setSubmittingRequest(false)
   }
 
   const ongoingItems = items.filter(item => {
@@ -135,7 +184,52 @@ export default function MemberDashboard() {
           <button onClick={()=>setTab('done')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab==='done'?'bg-blue-600 text-white':'bg-white text-gray-600 border border-gray-200'}`}>
             완료한 납부 <span className={`ml-1 text-xs px-1.5 py-0.5 rounded-full font-bold ${tab==='done'?'bg-white text-blue-600':'bg-green-100 text-green-600'}`}>{doneItems.length}</span>
           </button>
+          <button onClick={()=>setShowRequestForm(true)} className="ml-auto flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium bg-gray-800 text-white hover:bg-gray-700 transition-colors">
+            <Plus size={15}/>직접 신청하기
+          </button>
         </div>
+
+        {showRequestForm && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={()=>setShowRequestForm(false)}>
+            <div className="bg-white rounded-2xl p-5 w-full max-w-sm" onClick={e=>e.stopPropagation()}>
+              <h3 className="font-bold text-gray-800 mb-1">직접 납부 신청</h3>
+              <p className="text-xs text-gray-400 mb-4">예: 교재비를 먼저 입금하신 경우, 내용을 입력하고 증빙을 첨부해 신청하세요.</p>
+              <div className="space-y-3 mb-4">
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">항목명 *</label>
+                  <input type="text" placeholder="예: 전도학개론 교재비" value={requestForm.title}
+                    onChange={e=>setRequestForm({...requestForm,title:e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">금액 (원) *</label>
+                  <input type="number" placeholder="15000" value={requestForm.amount}
+                    onChange={e=>setRequestForm({...requestForm,amount:e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">설명 (선택)</label>
+                  <input type="text" placeholder="추가 설명" value={requestForm.description}
+                    onChange={e=>setRequestForm({...requestForm,description:e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">증빙 사진 *</label>
+                  <input type="file" accept="image/*"
+                    onChange={e=>setRequestFile(e.target.files[0])}
+                    className="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 file:text-sm"/>
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button onClick={()=>setShowRequestForm(false)} className="px-4 py-2 text-sm text-gray-500 hover:bg-gray-100 rounded-lg">취소</button>
+                <button onClick={handleSubmitRequest} disabled={submittingRequest}
+                  className="px-4 py-2 text-sm bg-blue-600 disabled:bg-blue-300 text-white rounded-lg hover:bg-blue-700">
+                  {submittingRequest ? '신청 중...' : '신청하기'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3">
           {tab === 'ongoing' && (
