@@ -126,6 +126,61 @@ export default function AdminDashboard() {
     ? 'px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white'
     : 'px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-600 border border-gray-200'
 
+  function ItemManageCard({ item }) {
+    const itemPays = payments.filter(p => p.item_id === item.id)
+    const confirmedPays = itemPays.filter(p => p.status === 'confirmed')
+    const targetCount = item.target_ids?.length || 0
+    const pct = targetCount ? Math.round(confirmedPays.length / targetCount * 100) : 0
+    const confirmedNames = confirmedPays.map(p => p.profiles?.name)
+    const targetMembers = members.filter(m => item.target_ids?.includes(m.id))
+    const unpaidMembers = targetMembers.filter(m => !confirmedNames.includes(m.name))
+    const isExpanded = expandedItem === item.id
+
+    return (
+      <div className={`bg-white rounded-xl shadow-sm border ${item.is_self_requested ? 'border-amber-200' : 'border-gray-100'}`}>
+        <div className="p-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h3 className="font-bold text-gray-800">{item.title}</h3>
+                {item.is_self_requested && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">직접 신청</span>}
+              </div>
+              <p className="text-blue-600 font-semibold">{item.amount.toLocaleString()}원</p>
+              {item.description && <p className="text-xs text-gray-400">{item.description}</p>}
+              <p className="text-xs text-gray-400 mt-1">대상: {targetCount}명</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">{confirmedPays.length}/{targetCount}명 납부</span>
+              <button onClick={()=>setExpandedItem(isExpanded?null:item.id)} className="p-1 hover:bg-gray-100 rounded">
+                {isExpanded ? <ChevronUp size={18}/> : <ChevronDown size={18}/>}
+              </button>
+              <button onClick={()=>deleteItem(item.id)} className="p-1 hover:bg-red-50 text-red-400 rounded">
+                <Trash2 size={16}/>
+              </button>
+            </div>
+          </div>
+          <div className="mt-2 bg-gray-100 rounded-full h-1.5">
+            <div className="bg-blue-500 rounded-full h-1.5 transition-all" style={{width:`${pct}%`}}/>
+          </div>
+        </div>
+        {isExpanded && (
+          <div className="border-t border-gray-50 p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-medium text-gray-400 mb-2">✅ 납부 완료 ({confirmedNames.length}명)</p>
+                {confirmedNames.length ? confirmedNames.map((n,i)=><p key={i} className="text-sm text-gray-700">{n}</p>) : <p className="text-sm text-gray-300">없음</p>}
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-400 mb-2">❌ 미납부 ({unpaidMembers.length}명)</p>
+                {unpaidMembers.length ? unpaidMembers.map(m=><p key={m.id} className="text-sm text-gray-400">{m.name}</p>) : <p className="text-sm text-green-500 font-medium">전원 납부!</p>}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -255,57 +310,20 @@ export default function AdminDashboard() {
 
             <div className="space-y-3">
               {items.length === 0 && <div className="bg-white rounded-xl p-8 text-center text-gray-400">납부 항목이 없습니다</div>}
-              {items.map(item => {
-                const itemPays = payments.filter(p => p.item_id === item.id)
-                const confirmedPays = itemPays.filter(p => p.status === 'confirmed')
-                const targetCount = item.target_ids?.length || 0
-                const pct = targetCount ? Math.round(confirmedPays.length / targetCount * 100) : 0
-                const confirmedNames = confirmedPays.map(p => p.profiles?.name)
-                const targetMembers = members.filter(m => item.target_ids?.includes(m.id))
-                const unpaidMembers = targetMembers.filter(m => !confirmedNames.includes(m.name))
-                const isExpanded = expandedItem === item.id
 
-                return (
-                  <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-bold text-gray-800">{item.title}</h3>
-                          <p className="text-blue-600 font-semibold">{item.amount.toLocaleString()}원</p>
-                          {item.description && <p className="text-xs text-gray-400">{item.description}</p>}
-                          <p className="text-xs text-gray-400 mt-1">대상: {targetCount}명</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-500">{confirmedPays.length}/{targetCount}명 납부</span>
-                          <button onClick={()=>setExpandedItem(isExpanded?null:item.id)} className="p-1 hover:bg-gray-100 rounded">
-                            {isExpanded ? <ChevronUp size={18}/> : <ChevronDown size={18}/>}
-                          </button>
-                          <button onClick={()=>deleteItem(item.id)} className="p-1 hover:bg-red-50 text-red-400 rounded">
-                            <Trash2 size={16}/>
-                          </button>
-                        </div>
-                      </div>
-                      <div className="mt-2 bg-gray-100 rounded-full h-1.5">
-                        <div className="bg-blue-500 rounded-full h-1.5 transition-all" style={{width:`${pct}%`}}/>
-                      </div>
-                    </div>
-                    {isExpanded && (
-                      <div className="border-t border-gray-50 p-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-xs font-medium text-gray-400 mb-2">✅ 납부 완료 ({confirmedNames.length}명)</p>
-                            {confirmedNames.length ? confirmedNames.map((n,i)=><p key={i} className="text-sm text-gray-700">{n}</p>) : <p className="text-sm text-gray-300">없음</p>}
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-gray-400 mb-2">❌ 미납부 ({unpaidMembers.length}명)</p>
-                            {unpaidMembers.length ? unpaidMembers.map(m=><p key={m.id} className="text-sm text-gray-400">{m.name}</p>) : <p className="text-sm text-green-500 font-medium">전원 납부!</p>}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+              {items.filter(i => !i.is_self_requested).length > 0 && (
+                <p className="text-xs font-bold text-gray-400 pt-1">📋 관리자 생성 항목</p>
+              )}
+              {items.filter(i => !i.is_self_requested).map(item => (
+                <ItemManageCard key={item.id} item={item} />
+              ))}
+
+              {items.filter(i => i.is_self_requested).length > 0 && (
+                <p className="text-xs font-bold text-gray-400 pt-3">📥 신청받은 항목 (사용자 직접 신청)</p>
+              )}
+              {items.filter(i => i.is_self_requested).map(item => (
+                <ItemManageCard key={item.id} item={item} />
+              ))}
             </div>
           </div>
         )}
