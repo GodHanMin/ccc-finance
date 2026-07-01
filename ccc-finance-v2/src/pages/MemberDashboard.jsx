@@ -152,8 +152,8 @@ export default function MemberDashboard() {
 
         <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
           <p className="text-sm font-bold text-yellow-800 mb-1">💳 입금 계좌</p>
-          <p className="text-sm text-yellow-700">카카오뱅크 3333-00-0000000</p>
-          <p className="text-sm text-yellow-700">예금주: 제천CCC 회계</p>
+          <p className="text-sm text-yellow-700">카카오뱅크 3333344408600</p>
+          <p className="text-sm text-yellow-700">예금주: 강한민</p>
           <p className="text-xs text-yellow-600 mt-1">입금 후 납부 인증 버튼을 눌러주세요!</p>
         </div>
       </div>
