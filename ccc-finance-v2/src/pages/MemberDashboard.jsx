@@ -260,12 +260,14 @@ export default function MemberDashboard() {
 
       {receiptModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={()=>setReceiptModal(null)}>
-          <div className="bg-white rounded-2xl p-4 w-full max-w-sm" onClick={e=>e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-3">
+          <div className="bg-white rounded-2xl w-full max-w-sm max-h-[85vh] flex flex-col overflow-hidden" onClick={e=>e.stopPropagation()}>
+            <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 shrink-0">
               <p className="font-bold text-gray-800">납부 증빙 사진</p>
-              <button onClick={()=>setReceiptModal(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+              <button onClick={()=>setReceiptModal(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1 -m-1">✕</button>
             </div>
-            <img src={receiptModal} alt="receipt" className="w-full rounded-xl"/>
+            <div className="overflow-y-auto p-4">
+              <img src={receiptModal} alt="receipt" className="w-full h-auto rounded-xl"/>
+            </div>
           </div>
         </div>
       )}
