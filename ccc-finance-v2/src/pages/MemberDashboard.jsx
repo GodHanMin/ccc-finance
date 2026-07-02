@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import Navbar from '../components/Navbar'
 import toast from 'react-hot-toast'
 import { Upload, CheckCircle, Clock, XCircle, Plus } from 'lucide-react'
+import HowToGuide from '../components/HowToGuide'
 
 export default function MemberDashboard() {
   const { user, profile } = useAuth()
@@ -191,13 +192,17 @@ export default function MemberDashboard() {
           </div>
         </div>
 
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-3">
           <button onClick={()=>setTab('ongoing')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab==='ongoing'?'bg-blue-600 text-white':'bg-white text-gray-600 border border-gray-200'}`}>
             진행중 <span className={`ml-1 text-xs px-1.5 py-0.5 rounded-full font-bold ${tab==='ongoing'?'bg-white text-blue-600':'bg-blue-100 text-blue-600'}`}>{ongoingItems.length}</span>
           </button>
           <button onClick={()=>setTab('done')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab==='done'?'bg-blue-600 text-white':'bg-white text-gray-600 border border-gray-200'}`}>
             완료한 납부 <span className={`ml-1 text-xs px-1.5 py-0.5 rounded-full font-bold ${tab==='done'?'bg-white text-blue-600':'bg-green-100 text-green-600'}`}>{doneItems.length}</span>
           </button>
+        </div>
+
+        <div className="flex gap-2 mb-4">
+          <HowToGuide />
           <button onClick={()=>setShowRequestForm(true)} className="ml-auto flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium bg-gray-800 text-white hover:bg-gray-700 transition-colors">
             <Plus size={15}/>직접 신청하기
           </button>
