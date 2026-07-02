@@ -2,12 +2,13 @@ import { useAuth } from '../contexts/AuthContext'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { LogOut, User, ArrowLeftRight } from 'lucide-react'
 
-export default function Navbar() {
+// base: '/finance' 또는 '/attendance' 등 - 어떤 기능 화면인지에 따라 전환 버튼 경로가 달라짐
+export default function Navbar({ base = '/finance' }) {
   const { profile, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const isAdminRole = profile?.role === 'admin' || profile?.role === 'subadmin'
-  const onAdminScreen = location.pathname.startsWith('/finance/admin')
+  const onAdminScreen = location.pathname.startsWith(`${base}/admin`)
 
   return (
     <nav className="bg-white shadow-sm border-b sticky top-0 z-40">
@@ -24,11 +25,11 @@ export default function Navbar() {
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {isAdminRole && (
             <button
-              onClick={() => navigate(onAdminScreen ? '/finance/member' : '/finance/admin', { replace: true })}
+              onClick={() => navigate(onAdminScreen ? `${base}/member` : `${base}/admin`, { replace: true })}
               className="flex items-center gap-1 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
             >
               <ArrowLeftRight size={13} className="shrink-0" />
-              <span>{onAdminScreen ? '납부' : '관리자'}</span>
+              <span>{onAdminScreen ? '내 화면' : '관리자'}</span>
             </button>
           )}
           <div className="hidden sm:flex items-center gap-1 text-sm text-gray-600 whitespace-nowrap">
