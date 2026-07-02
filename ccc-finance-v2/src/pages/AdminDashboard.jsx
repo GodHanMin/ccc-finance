@@ -47,6 +47,20 @@ export default function AdminDashboard() {
   const pendingPays = payments.filter(p => p.status === 'pending')
   const totalCollected = payments.filter(p => p.status === 'confirmed').reduce((s, p) => s + (p.payment_items?.amount || 0), 0)
 
+  // 뒤로가기를 누르면 사진 모달만 닫히도록 처리
+  useEffect(() => {
+    if (!receiptModal) return
+    window.history.pushState({ modal: 'receipt' }, '')
+    const onPop = () => setReceiptModal(null)
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [receiptModal])
+
+  function closeReceiptModal() {
+    if (window.history.state?.modal === 'receipt') window.history.back()
+    else setReceiptModal(null)
+  }
+
   async function updatePayStatus(payId, status) {
     await supabase.from('payments').update({ status, confirmed_at: new Date().toISOString() }).eq('id', payId)
     toast.success(status === 'confirmed' ? '납부 확인 완료! ✅' : '반려했습니다')
@@ -400,11 +414,11 @@ export default function AdminDashboard() {
       </div>
 
       {receiptModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={()=>setReceiptModal(null)}>
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={closeReceiptModal}>
           <div className="bg-white rounded-2xl w-full max-w-sm max-h-[85vh] flex flex-col overflow-hidden" onClick={e=>e.stopPropagation()}>
             <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 shrink-0">
               <p className="font-bold text-gray-800">납부 증빙 사진</p>
-              <button onClick={()=>setReceiptModal(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1 -m-1">✕</button>
+              <button onClick={closeReceiptModal} className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1 -m-1">✕</button>
             </div>
             <div className="overflow-y-auto p-4">
               <img src={receiptModal} alt="receipt" className="w-full h-auto rounded-xl"/>
