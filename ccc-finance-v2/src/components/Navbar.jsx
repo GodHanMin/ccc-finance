@@ -1,5 +1,5 @@
 import { useAuth } from '../contexts/AuthContext'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { LogOut, User, ArrowLeftRight } from 'lucide-react'
 
 export default function Navbar() {
@@ -7,12 +7,12 @@ export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const isAdminRole = profile?.role === 'admin' || profile?.role === 'subadmin'
-  const onAdminScreen = location.pathname.startsWith('/admin')
+  const onAdminScreen = location.pathname.startsWith('/finance/admin')
 
   return (
     <nav className="bg-white shadow-sm border-b sticky top-0 z-40">
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0 shrink">
+        <Link to="/" className="flex items-center gap-1.5 min-w-0 shrink">
           <span className="text-lg sm:text-xl font-bold text-blue-600 shrink-0">✝</span>
           <span className="font-bold text-gray-800 text-sm sm:text-base whitespace-nowrap">제천 CCC</span>
           {isAdminRole && (
@@ -20,11 +20,11 @@ export default function Navbar() {
               {profile.role === 'admin' ? '관리자' : '부관리자'}
             </span>
           )}
-        </div>
+        </Link>
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {isAdminRole && (
             <button
-              onClick={() => navigate(onAdminScreen ? '/member' : '/admin', { replace: true })}
+              onClick={() => navigate(onAdminScreen ? '/finance/member' : '/finance/admin', { replace: true })}
               className="flex items-center gap-1 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
             >
               <ArrowLeftRight size={13} className="shrink-0" />
