@@ -74,16 +74,19 @@ export default function Home() {
             <span className="text-[13px] font-semibold text-gray-800">재정</span>
           </Link>
 
-          <ComingSoonTile
-            label="아침모임 출석"
-            icon={
+          <Link
+            to="/attendance"
+            className="relative aspect-square rounded-[18px] flex flex-col items-center justify-center gap-2 border border-transparent bg-gradient-to-br from-white to-orange-50 shadow-[0_1px_2px_rgba(28,27,46,.04),0_10px_24px_-12px_rgba(217,138,95,.35)] active:scale-95 hover:-translate-y-0.5 transition-transform"
+          >
+            <span className="w-9 h-9 rounded-xl flex items-center justify-center shadow-[0_6px_14px_-6px_rgba(217,138,95,.6)]" style={{ background: 'linear-gradient(135deg, #4a4a8c, #d98a5f)' }}>
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="14" r="7" stroke="currentColor" strokeWidth="1.7" />
-                <path d="M12 10.5V14L14.3 15.6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-                <path d="M9 3H15 M12 3V6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                <circle cx="12" cy="14" r="7" stroke="#fff" strokeWidth="1.7" />
+                <path d="M12 10.5V14L14.3 15.6" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" />
+                <path d="M9 3H15 M12 3V6" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" />
               </svg>
-            }
-          />
+            </span>
+            <span className="text-[13px] font-semibold text-gray-800">아침모임 출석</span>
+          </Link>
           <ComingSoonTile
             label="공지사항"
             icon={
