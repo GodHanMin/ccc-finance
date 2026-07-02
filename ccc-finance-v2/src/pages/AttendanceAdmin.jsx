@@ -80,6 +80,19 @@ export default function AttendanceAdmin() {
     return { ...m, count: myRecs.length, rate }
   }).sort((a, b) => b.rate - a.rate)
 
+  // 이번 주 월~금 날짜 계산
+  const now = new Date()
+  const monday = new Date(now)
+  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7))
+  const weekDates = Array.from({ length: 5 }, (_, i) => {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
+  })
+  const weekLabels = ['월', '화', '수', '목', '금']
+
+  const userRecordDates = (userId) => new Set(records.filter(r => r.user_id === userId).map(r => r.record_date))
+
   const todayCheckedCount = records.filter(r => r.record_date === today).length
 
   return (
@@ -109,26 +122,56 @@ export default function AttendanceAdmin() {
 
         {tab === 'status' && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-            <div className="p-4 border-b border-gray-100">
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
               <p className="font-bold text-gray-700">🔥 {statusTerm ? statusTerm.name : '학기 정보 없음'} 참여율</p>
-              {!statusTerm && <p className="text-xs text-gray-400 mt-1">학기 관리 탭에서 먼저 학기를 등록해주세요</p>}
+              <div className="hidden sm:flex gap-1.5 pr-1">
+                {weekLabels.map(l => <span key={l} className="w-6 text-center text-[10px] font-medium text-gray-400">{l}</span>)}
+              </div>
             </div>
+            {!statusTerm && <p className="text-xs text-gray-400 px-4 pt-1">학기 관리 탭에서 먼저 학기를 등록해주세요</p>}
             <div className="divide-y divide-gray-50">
-              {memberStats.map(m => (
-                <div key={m.id} className="p-4 flex justify-between items-center">
-                  <div>
-                    <p className="font-medium text-gray-800">{m.name}</p>
-                    {m.student_id && <p className="text-xs text-gray-400">{m.student_id}</p>}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-400">{m.count}/{elapsedWeekdays}일</span>
-                    <div className="flex items-center gap-1 w-16 justify-end">
-                      <span className={`font-bold text-sm ${m.rate >= 80 ? 'text-orange-500' : m.rate >= 50 ? 'text-amber-500' : 'text-gray-400'}`}>{m.rate}%</span>
-                      {m.rate >= 80 && <Flame size={13} className="text-orange-500" />}
+              {memberStats.map(m => {
+                const myDates = userRecordDates(m.id)
+                return (
+                  <div key={m.id} className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                    <div className="flex items-center justify-between sm:block">
+                      <div>
+                        <p className="font-medium text-gray-800">{m.name}</p>
+                        {m.student_id && <p className="text-xs text-gray-400">{m.student_id}</p>}
+                      </div>
+                      <div className="flex sm:hidden items-center gap-1">
+                        <span className={`font-bold text-sm ${m.rate >= 80 ? 'text-orange-500' : m.rate >= 50 ? 'text-amber-500' : 'text-gray-400'}`}>{m.rate}%</span>
+                        {m.rate >= 80 && <Flame size={13} className="text-orange-500" />}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="flex gap-1.5">
+                        {weekDates.map((d, i) => {
+                          const done = myDates.has(d)
+                          const isFuture = d > today
+                          return (
+                            <div key={d} className="flex flex-col items-center gap-1">
+                              <span className="sm:hidden text-[9px] text-gray-400">{weekLabels[i]}</span>
+                              <span
+                                className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                                  done ? 'bg-emerald-500 text-white' : isFuture ? 'bg-gray-100 text-gray-300' : 'bg-red-50 text-red-300'
+                                }`}
+                              >
+                                {done ? '✓' : isFuture ? '' : '✕'}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      <div className="hidden sm:flex items-center gap-2 w-24 justify-end shrink-0">
+                        <span className="text-xs text-gray-400">{m.count}/{elapsedWeekdays}일</span>
+                        <span className={`font-bold text-sm ${m.rate >= 80 ? 'text-orange-500' : m.rate >= 50 ? 'text-amber-500' : 'text-gray-400'}`}>{m.rate}%</span>
+                        {m.rate >= 80 && <Flame size={13} className="text-orange-500" />}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
               {memberStats.length === 0 && <div className="p-8 text-center text-gray-400">가입자가 없습니다</div>}
             </div>
           </div>
