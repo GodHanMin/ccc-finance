@@ -2,3 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 body { font-family: "Apple SD Gothic Neo", "맑은 고딕", sans-serif; }
+
+/* 모바일/PC 공통: 화면 폭보다 콘텐츠가 넘쳐서 가로 스크롤이 생기는 것 방지 */
+html, body, #root { max-width: 100%; overflow-x: hidden; }
+* { min-width: 0; }
