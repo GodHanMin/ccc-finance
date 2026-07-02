@@ -37,7 +37,7 @@ export default function AttendanceAdmin() {
   async function fetchAll() {
     const [{ data: t }, { data: m }, { data: r }] = await Promise.all([
       supabase.from('attendance_terms').select('*').order('start_date', { ascending: false }),
-      supabase.from('profiles').select('*').eq('role', 'member').order('name'),
+      supabase.from('profiles').select('*').order('name'),
       supabase.from('attendance_records').select('*'),
     ])
     setTerms(t || [])
@@ -136,7 +136,14 @@ export default function AttendanceAdmin() {
                   <div key={m.id} className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
                     <div className="flex items-center justify-between sm:block">
                       <div>
-                        <p className="font-medium text-gray-800">{m.name}</p>
+                        <p className="font-medium text-gray-800 flex items-center gap-1.5">
+                          {m.name}
+                          {(m.role === 'admin' || m.role === 'subadmin') && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600 font-bold">
+                              {m.role === 'admin' ? '관리자' : '부관리자'}
+                            </span>
+                          )}
+                        </p>
                         {m.student_id && <p className="text-xs text-gray-400">{m.student_id}</p>}
                       </div>
                       <div className="flex sm:hidden items-center gap-1">
