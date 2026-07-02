@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
     await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
-        redirectTo: window.location.origin + '/finance',
+        redirectTo: window.location.origin + window.location.pathname,
         scopes: 'profile_nickname', // 이메일 권한 미보유로 닉네임만 요청 (KOE205 방지)
       }
     })
@@ -42,7 +42,7 @@ export function AuthProvider({ children }) {
   async function loginWithGoogle() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/finance' }
+      options: { redirectTo: window.location.origin + window.location.pathname }
     })
   }
 
