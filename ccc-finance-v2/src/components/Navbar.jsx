@@ -24,7 +24,7 @@ export default function Navbar() {
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {isAdminRole && (
             <button
-              onClick={() => navigate(onAdminScreen ? '/member' : '/admin')}
+              onClick={() => navigate(onAdminScreen ? '/member' : '/admin', { replace: true })}
               className="flex items-center gap-1 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
             >
               <ArrowLeftRight size={13} className="shrink-0" />
