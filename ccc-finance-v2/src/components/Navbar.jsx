@@ -23,7 +23,7 @@ export default function Navbar({ base = '/finance' }) {
           )}
         </Link>
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-          {isAdminRole && (
+          {isAdminRole && base !== '/mypage' && (
             <button
               onClick={() => navigate(onAdminScreen ? `${base}/member` : `${base}/admin`, { replace: true })}
               className="flex items-center gap-1 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
@@ -32,9 +32,9 @@ export default function Navbar({ base = '/finance' }) {
               <span>{onAdminScreen ? '내 화면' : '관리자'}</span>
             </button>
           )}
-          <div className="hidden sm:flex items-center gap-1 text-sm text-gray-600 whitespace-nowrap">
-            <User size={16} className="shrink-0" /><span>{profile?.name}</span>
-          </div>
+          <Link to="/mypage" className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 hover:text-blue-600 transition-colors whitespace-nowrap" title="마이페이지">
+            <User size={16} className="shrink-0" /><span className="hidden sm:inline">{profile?.name}</span>
+          </Link>
           <button onClick={logout} className="flex items-center gap-1 text-xs sm:text-sm text-gray-400 hover:text-red-500 transition-colors whitespace-nowrap">
             <LogOut size={16} className="shrink-0" /><span className="hidden sm:inline">로그아웃</span>
           </button>
