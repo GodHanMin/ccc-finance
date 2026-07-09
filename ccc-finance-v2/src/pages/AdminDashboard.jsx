@@ -379,21 +379,27 @@ export default function AdminDashboard() {
                         </p>
                         {m.student_id&&<p className="text-xs text-gray-400">{m.student_id}</p>}
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <select value={m.position || '순원'}
-                          onChange={e => updateMemberField(m.id, { position: e.target.value })}
-                          className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                          {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
-                        </select>
-                        <select value={m.sun_leader_id || ''}
-                          onChange={e => updateMemberField(m.id, { sun_leader_id: e.target.value || null })}
-                          className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                          <option value="">순 미배정</option>
-                          {leaders.filter(l => l.id !== m.id).map(l => (
-                            <option key={l.id} value={l.id}>{l.name} 순</option>
-                          ))}
-                        </select>
-                        <button onClick={()=>deleteMember(m.id)} className="text-xs text-red-300 hover:text-red-500 whitespace-nowrap">삭제</button>
+                      <div className="flex items-end gap-2 shrink-0">
+                        <div>
+                          <p className="text-[10px] font-medium text-gray-400 mb-0.5 pl-0.5">직책</p>
+                          <select value={m.position || '순원'}
+                            onChange={e => updateMemberField(m.id, { position: e.target.value })}
+                            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-medium text-gray-400 mb-0.5 pl-0.5">담당 순</p>
+                          <select value={m.sun_leader_id || ''}
+                            onChange={e => updateMemberField(m.id, { sun_leader_id: e.target.value || null })}
+                            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">미배정</option>
+                            {leaders.filter(l => l.id !== m.id).map(l => (
+                              <option key={l.id} value={l.id}>{l.name} 순</option>
+                            ))}
+                          </select>
+                        </div>
+                        <button onClick={()=>deleteMember(m.id)} className="text-xs text-red-300 hover:text-red-500 whitespace-nowrap pb-2">삭제</button>
                       </div>
                     </div>
                   )
