@@ -5,6 +5,8 @@ import Navbar from '../components/Navbar'
 import toast from 'react-hot-toast'
 import { Plus, Trash2, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
 
+const POSITIONS = ['순원', '순장', '간사']
+
 export default function AdminDashboard() {
   const { user } = useAuth()
   const [tab, setTab] = useState('payments')
@@ -100,6 +102,14 @@ export default function AdminDashboard() {
     toast.success(memberForm.name + '님이 추가됐습니다 ✅')
     setShowMemberForm(false)
     setMemberForm({ name: '', student_id: '' })
+    fetchAll()
+  }
+
+  // 직책 / 순 배정 변경 (가입자 명단에서 관리자가 직접 수정)
+  async function updateMemberField(memberId, patch) {
+    const { error } = await supabase.from('profiles').update(patch).eq('id', memberId)
+    if (error) return toast.error('변경 중 오류가 발생했습니다')
+    toast.success('변경됐습니다 ✅')
     fetchAll()
   }
 
@@ -343,26 +353,55 @@ export default function AdminDashboard() {
         )}
 
         {/* 가입자 명단 */}
-        {tab === 'members' && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-            <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-              <p className="font-bold text-gray-700">👥 가입자 명단 ({members.length}명)</p>
-              <span className="text-xs text-gray-400">로그인 시 자동 등록됩니다</span>
-            </div>
-            <div className="divide-y divide-gray-50">
-              {members.map(m => {
-                return (
-                  <div key={m.id} className="p-4 flex justify-between items-center">
-                    <div><p className="font-medium text-gray-800">{m.name}</p>{m.student_id&&<p className="text-xs text-gray-400">{m.student_id}</p>}</div>
-                    <div className="flex items-center gap-3">
-                      <button onClick={()=>deleteMember(m.id)} className="text-xs text-red-300 hover:text-red-500">삭제</button>
+        {tab === 'members' && (() => {
+          const everyone = [...members, ...admins]
+          const leaders = everyone.filter(p => p.position === '순장')
+          return (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                <p className="font-bold text-gray-700">👥 가입자 명단 ({members.length}명)</p>
+                <span className="text-xs text-gray-400">로그인 시 자동 등록됩니다</span>
+              </div>
+              <div className="divide-y divide-gray-50">
+                {members.map(m => {
+                  const leaderName = everyone.find(p => p.id === m.sun_leader_id)?.name
+                  return (
+                    <div key={m.id} className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                      <div>
+                        <p className="font-medium text-gray-800 flex items-center gap-1.5">
+                          {m.name}
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${m.position==='간사'?'bg-purple-100 text-purple-700':m.position==='순장'?'bg-blue-100 text-blue-700':'bg-gray-100 text-gray-500'}`}>
+                            {m.position || '순원'}
+                          </span>
+                          {leaderName && m.position !== '순장' && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">{leaderName} 순</span>
+                          )}
+                        </p>
+                        {m.student_id&&<p className="text-xs text-gray-400">{m.student_id}</p>}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <select value={m.position || '순원'}
+                          onChange={e => updateMemberField(m.id, { position: e.target.value })}
+                          className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
+                        </select>
+                        <select value={m.sun_leader_id || ''}
+                          onChange={e => updateMemberField(m.id, { sun_leader_id: e.target.value || null })}
+                          className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <option value="">순 미배정</option>
+                          {leaders.filter(l => l.id !== m.id).map(l => (
+                            <option key={l.id} value={l.id}>{l.name} 순</option>
+                          ))}
+                        </select>
+                        <button onClick={()=>deleteMember(m.id)} className="text-xs text-red-300 hover:text-red-500 whitespace-nowrap">삭제</button>
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         {/* 관리자 관리 */}
         {tab === 'admins' && (
