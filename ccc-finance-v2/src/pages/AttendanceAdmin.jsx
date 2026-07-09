@@ -24,7 +24,6 @@ function countWeekdays(start, end) {
 
 export default function AttendanceAdmin() {
   const [tab, setTab] = useState('status')
-  const [view, setView] = useState('sun') // 'sun' 순별 보기 | 'all' 전체 보기
   const [terms, setTerms] = useState([])
   const [members, setMembers] = useState([])
   const [records, setRecords] = useState([])
@@ -121,150 +120,69 @@ export default function AttendanceAdmin() {
           <button onClick={() => setTab('terms')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'terms' ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 border border-gray-200'}`}>학기 관리</button>
         </div>
 
-        {tab === 'status' && (() => {
-          // 개인별 행 렌더링 (순별/전체 보기 공용)
-          const renderRow = (m, isLeader = false) => {
-            const myDates = userRecordDates(m.id)
-            return (
-              <div key={m.id} className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
-                <div className="flex items-center justify-between sm:block">
-                  <div>
-                    <p className="font-medium text-gray-800 flex items-center gap-1.5">
-                      {isLeader && <span>🌱</span>}
-                      {m.name}
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${m.position==='간사'?'bg-purple-100 text-purple-600':m.position==='순장'?'bg-blue-100 text-blue-600':'bg-gray-100 text-gray-400'}`}>
-                        {m.position || '순원'}
-                      </span>
-                      {(m.role === 'admin' || m.role === 'subadmin') && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600 font-bold">
-                          {m.role === 'admin' ? '관리자' : '부관리자'}
-                        </span>
-                      )}
-                    </p>
-                    {m.student_id && <p className="text-xs text-gray-400">{m.student_id}</p>}
-                  </div>
-                  <div className="flex sm:hidden items-center gap-1">
-                    <span className={`font-bold text-sm ${m.rate >= 80 ? 'text-orange-500' : m.rate >= 50 ? 'text-amber-500' : 'text-gray-400'}`}>{m.rate}%</span>
-                    {m.rate >= 80 && <Flame size={13} className="text-orange-500" />}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <div className="flex gap-1.5">
-                    {weekDates.map((d, i) => {
-                      const done = myDates.has(d)
-                      const isFuture = d > today
-                      return (
-                        <div key={d} className="flex flex-col items-center gap-1">
-                          <span className="sm:hidden text-[9px] text-gray-400">{weekLabels[i]}</span>
-                          <span
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                              done ? 'bg-emerald-500 text-white' : isFuture ? 'bg-gray-100 text-gray-300' : 'bg-red-50 text-red-300'
-                            }`}
-                          >
-                            {done ? '✓' : isFuture ? '' : '✕'}
-                          </span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                  <div className="hidden sm:flex items-center gap-2 w-24 justify-end shrink-0">
-                    <span className="text-xs text-gray-400">{m.count}/{elapsedWeekdays}일</span>
-                    <span className={`font-bold text-sm ${m.rate >= 80 ? 'text-orange-500' : m.rate >= 50 ? 'text-amber-500' : 'text-gray-400'}`}>{m.rate}%</span>
-                    {m.rate >= 80 && <Flame size={13} className="text-orange-500" />}
-                  </div>
-                </div>
-              </div>
-            )
-          }
-
-          // 순별 그룹 구성: 순장별 그룹 + 간사 + 미배정
-          const sunLeaders = memberStats.filter(m => m.position === '순장')
-          const sunGroups = sunLeaders.map(l => ({
-            leader: l,
-            members: memberStats.filter(m => m.sun_leader_id === l.id && m.id !== l.id),
-          }))
-          const gansa = memberStats.filter(m => m.position === '간사' && !m.sun_leader_id)
-          const groupedIds = new Set([
-            ...sunLeaders.map(l => l.id),
-            ...gansa.map(g => g.id),
-            ...sunGroups.flatMap(g => g.members.map(m => m.id)),
-          ])
-          const unassigned = memberStats.filter(m => !groupedIds.has(m.id))
-          const groupAvg = (g) => {
-            const all = [g.leader, ...g.members]
-            return Math.round(all.reduce((s, m) => s + m.rate, 0) / all.length)
-          }
-
-          const header = (
+        {tab === 'status' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
             <div className="p-4 border-b border-gray-100 flex items-center justify-between">
               <p className="font-bold text-gray-700">🔥 {statusTerm ? statusTerm.name : '학기 정보 없음'} 참여율</p>
-              <div className="flex items-center gap-2">
-                <div className="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-medium">
-                  <button onClick={() => setView('sun')} className={`px-2.5 py-1 ${view==='sun'?'bg-orange-500 text-white':'bg-white text-gray-500'}`}>순별</button>
-                  <button onClick={() => setView('all')} className={`px-2.5 py-1 ${view==='all'?'bg-orange-500 text-white':'bg-white text-gray-500'}`}>전체</button>
-                </div>
-                <div className="hidden sm:flex gap-1.5 pr-1">
-                  {weekLabels.map(l => <span key={l} className="w-6 text-center text-[10px] font-medium text-gray-400">{l}</span>)}
-                </div>
+              <div className="hidden sm:flex gap-1.5 pr-1">
+                {weekLabels.map(l => <span key={l} className="w-6 text-center text-[10px] font-medium text-gray-400">{l}</span>)}
               </div>
             </div>
-          )
-
-          if (view === 'all') {
-            return (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                {header}
-                {!statusTerm && <p className="text-xs text-gray-400 px-4 pt-1">학기 관리 탭에서 먼저 학기를 등록해주세요</p>}
-                <div className="divide-y divide-gray-50">
-                  {memberStats.map(m => renderRow(m))}
-                  {memberStats.length === 0 && <div className="p-8 text-center text-gray-400">가입자가 없습니다</div>}
-                </div>
-              </div>
-            )
-          }
-
-          return (
-            <div className="space-y-4">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100">{header}
-                {!statusTerm && <p className="text-xs text-gray-400 px-4 py-2">학기 관리 탭에서 먼저 학기를 등록해주세요</p>}
-                {sunLeaders.length === 0 && (
-                  <p className="text-xs text-gray-400 px-4 py-3">아직 순장이 없습니다. 재정 → 가입자 명단에서 직책과 순을 배정해주세요.</p>
-                )}
-              </div>
-
-              {sunGroups.map(g => (
-                <div key={g.leader.id} className="bg-white rounded-xl shadow-sm border border-gray-100">
-                  <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-orange-50/60 rounded-t-xl">
-                    <p className="font-bold text-gray-700 text-sm">🌱 {g.leader.name} 순 <span className="text-xs font-medium text-gray-400 ml-1">{g.members.length + 1}명</span></p>
-                    <span className={`text-sm font-bold ${groupAvg(g) >= 80 ? 'text-orange-500' : groupAvg(g) >= 50 ? 'text-amber-500' : 'text-gray-400'}`}>평균 {groupAvg(g)}%</span>
+            {!statusTerm && <p className="text-xs text-gray-400 px-4 pt-1">학기 관리 탭에서 먼저 학기를 등록해주세요</p>}
+            <div className="divide-y divide-gray-50">
+              {memberStats.map(m => {
+                const myDates = userRecordDates(m.id)
+                return (
+                  <div key={m.id} className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                    <div className="flex items-center justify-between sm:block">
+                      <div>
+                        <p className="font-medium text-gray-800 flex items-center gap-1.5">
+                          {m.name}
+                          {(m.role === 'admin' || m.role === 'subadmin') && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600 font-bold">
+                              {m.role === 'admin' ? '관리자' : '부관리자'}
+                            </span>
+                          )}
+                        </p>
+                        {m.student_id && <p className="text-xs text-gray-400">{m.student_id}</p>}
+                      </div>
+                      <div className="flex sm:hidden items-center gap-1">
+                        <span className={`font-bold text-sm ${m.rate >= 80 ? 'text-orange-500' : m.rate >= 50 ? 'text-amber-500' : 'text-gray-400'}`}>{m.rate}%</span>
+                        {m.rate >= 80 && <Flame size={13} className="text-orange-500" />}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="flex gap-1.5">
+                        {weekDates.map((d, i) => {
+                          const done = myDates.has(d)
+                          const isFuture = d > today
+                          return (
+                            <div key={d} className="flex flex-col items-center gap-1">
+                              <span className="sm:hidden text-[9px] text-gray-400">{weekLabels[i]}</span>
+                              <span
+                                className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                                  done ? 'bg-emerald-500 text-white' : isFuture ? 'bg-gray-100 text-gray-300' : 'bg-red-50 text-red-300'
+                                }`}
+                              >
+                                {done ? '✓' : isFuture ? '' : '✕'}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      <div className="hidden sm:flex items-center gap-2 w-24 justify-end shrink-0">
+                        <span className="text-xs text-gray-400">{m.count}/{elapsedWeekdays}일</span>
+                        <span className={`font-bold text-sm ${m.rate >= 80 ? 'text-orange-500' : m.rate >= 50 ? 'text-amber-500' : 'text-gray-400'}`}>{m.rate}%</span>
+                        {m.rate >= 80 && <Flame size={13} className="text-orange-500" />}
+                      </div>
+                    </div>
                   </div>
-                  <div className="divide-y divide-gray-50">
-                    {renderRow(g.leader, true)}
-                    {g.members.map(m => renderRow(m))}
-                  </div>
-                </div>
-              ))}
-
-              {gansa.length > 0 && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                  <div className="px-4 py-3 border-b border-gray-100 bg-purple-50/60 rounded-t-xl">
-                    <p className="font-bold text-gray-700 text-sm">💼 간사 <span className="text-xs font-medium text-gray-400 ml-1">{gansa.length}명</span></p>
-                  </div>
-                  <div className="divide-y divide-gray-50">{gansa.map(m => renderRow(m))}</div>
-                </div>
-              )}
-
-              {unassigned.length > 0 && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 rounded-t-xl">
-                    <p className="font-bold text-gray-500 text-sm">📋 순 미배정 <span className="text-xs font-medium text-gray-400 ml-1">{unassigned.length}명</span></p>
-                  </div>
-                  <div className="divide-y divide-gray-50">{unassigned.map(m => renderRow(m))}</div>
-                </div>
-              )}
+                )
+              })}
+              {memberStats.length === 0 && <div className="p-8 text-center text-gray-400">가입자가 없습니다</div>}
             </div>
-          )
-        })()}
+          </div>
+        )}
 
         {tab === 'terms' && (
           <div>
