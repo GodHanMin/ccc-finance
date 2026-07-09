@@ -374,7 +374,7 @@ export default function AdminDashboard() {
                             {m.position || '순원'}
                           </span>
                           {leaderName && m.position !== '순장' && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">{leaderName} 순</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">담당: {leaderName}</span>
                           )}
                         </p>
                         {m.student_id&&<p className="text-xs text-gray-400">{m.student_id}</p>}
@@ -389,13 +389,13 @@ export default function AdminDashboard() {
                           </select>
                         </div>
                         <div>
-                          <p className="text-[10px] font-medium text-gray-400 mb-0.5 pl-0.5">담당 순</p>
+                          <p className="text-[10px] font-medium text-gray-400 mb-0.5 pl-0.5">담당자</p>
                           <select value={m.sun_leader_id || ''}
                             onChange={e => updateMemberField(m.id, { sun_leader_id: e.target.value || null })}
                             className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">미배정</option>
                             {leaders.filter(l => l.id !== m.id).map(l => (
-                              <option key={l.id} value={l.id}>{l.name} 순</option>
+                              <option key={l.id} value={l.id}>{l.name}</option>
                             ))}
                           </select>
                         </div>
