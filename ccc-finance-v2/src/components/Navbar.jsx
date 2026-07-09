@@ -32,8 +32,8 @@ export default function Navbar({ base = '/finance' }) {
               <span>{onAdminScreen ? '내 화면' : '관리자'}</span>
             </button>
           )}
-          <Link to="/mypage" className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 hover:text-blue-600 transition-colors whitespace-nowrap" title="마이페이지">
-            <User size={16} className="shrink-0" /><span className="hidden sm:inline">{profile?.name}</span>
+          <Link to="/mypage" className="flex items-center gap-1 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+            <User size={13} className="shrink-0" /><span>마이페이지</span>
           </Link>
           <button onClick={logout} className="flex items-center gap-1 text-xs sm:text-sm text-gray-400 hover:text-red-500 transition-colors whitespace-nowrap">
             <LogOut size={16} className="shrink-0" /><span className="hidden sm:inline">로그아웃</span>
